@@ -7,8 +7,9 @@ TEXTURES_ROOT = os.path.join(os.path.dirname(__file__), 'Resources', 'Textures')
 SCALE_FACTOR = 2  # 32xN -> 64xN, 32x96 -> 64x192, etc.
 
 def should_skip_dir(dirname):
-    # Skip .rsi folders (handled by the other script)
-    return dirname.lower().endswith('.rsi')
+    # Skip .rsi folders and specific excluded folders
+    excluded = {'.rsi', 'interface', 'parallaxes'}
+    return dirname.lower().endswith('.rsi') or dirname.lower() in excluded
 
 def resize_png(img_path, scale_factor):
     img = Image.open(img_path)
@@ -23,7 +24,8 @@ def resize_png(img_path, scale_factor):
 
 def walk_and_resize_pngs(root_dir):
     for dirpath, dirnames, filenames in os.walk(root_dir):
-        # Skip .rsi folders
+        # Remove excluded directories from dirnames so os.walk doesn't descend into them
+        dirnames[:] = [d for d in dirnames if not should_skip_dir(d)]
         if should_skip_dir(os.path.basename(dirpath)):
             continue
         for file in filenames:

@@ -39,10 +39,15 @@ def process_rsi_folder(rsi_path):
         return
     old_size = meta.get('size', [32, 32])
     # Ensure old_size is a list of two ints
+    if isinstance(old_size, dict):
+        old_size = [old_size.get('x', 32), old_size.get('y', 32)]
     if not (isinstance(old_size, list) and len(old_size) == 2 and all(isinstance(x, int) for x in old_size)):
         old_size = [32, 32]
     if old_size == [NEW_SIZE, NEW_SIZE]:
         return  # Already resized
+    if old_size[0] != old_size[1]:
+        print(f"Skipping non-square sprite: {rsi_path} (size: {old_size})")
+        return
     # Resize all PNGs in the folder
     for file in os.listdir(rsi_path):
         if file.lower().endswith('.png'):
